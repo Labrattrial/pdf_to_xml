@@ -19,8 +19,14 @@ fi
 echo "Extracting Audiveris..."
 unzip -o audiveris.zip
 
+echo "Building Audiveris..."
+cd audiveris-5.6.0-bis
+chmod +x gradlew
+./gradlew build -x test
+
 echo "Copying Audiveris jar..."
-cp audiveris-5.6.0-bis/app/build/libs/audiveris-5.6.0-bis.jar audiveris.jar
+cp app/build/libs/audiveris-5.6.0-bis.jar ../audiveris.jar
+cd ..
 
 echo "Cleaning up..."
 rm -rf audiveris.zip audiveris-5.6.0-bis
