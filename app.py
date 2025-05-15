@@ -45,7 +45,7 @@ def convert_pdf():
         
         # Run Audiveris conversion
         subprocess.run([
-            'java', '-jar', '/usr/local/bin/audiveris.jar',
+            'audiveris',
             '-batch', '-export', pdf_path,
             '-output', DOWNLOAD_FOLDER
         ], check=True)
