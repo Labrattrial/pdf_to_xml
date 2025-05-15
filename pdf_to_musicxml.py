@@ -4,15 +4,20 @@ import subprocess
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = 'uploads'
-MUSICXML_FOLDER = 'musicxml'
-AUDIVERIS_JAR = 'audiveris.jar'  # Path to Audiveris jar after build
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
+MUSICXML_FOLDER = os.getenv('MUSICXML_FOLDER', 'musicxml')
+AUDIVERIS_JAR = os.getenv('AUDIVERIS_JAR', 'audiveris.jar')
 
+# Ensure directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(MUSICXML_FOLDER, exist_ok=True)
 
@@ -20,6 +25,11 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MUSICXML_FOLDER'] = MUSICXML_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy'}), 200
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -41,14 +51,16 @@ def upload_file():
         xml_path = os.path.join(app.config['MUSICXML_FOLDER'], xml_filename)
         try:
             logger.info('Starting Audiveris conversion')
-            subprocess.run([
+            result = subprocess.run([
                 'java', '-jar', AUDIVERIS_JAR,
                 '-batch', '-export', pdf_path,
                 '-output', app.config['MUSICXML_FOLDER']
-            ], check=True)
+            ], check=True, capture_output=True, text=True)
             logger.info('Audiveris conversion completed')
+            logger.debug(f'Audiveris output: {result.stdout}')
         except subprocess.CalledProcessError as e:
             logger.error(f'Audiveris failed: {str(e)}')
+            logger.error(f'Error output: {e.stderr}')
             return jsonify({'error': 'Audiveris failed', 'details': str(e)}), 500
         if not os.path.exists(xml_path):
             # Try .xml extension fallback

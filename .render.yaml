@@ -1,9 +1,11 @@
 services:
   - type: web
-    name: audiveris-flask-api
+    name: pdf-to-musicxml
     env: python
-    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    buildCommand: ./render-build.sh
     startCommand: python pdf_to_musicxml.py
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.18 
+        value: 3.9.18
+      - key: PORT
+        value: 10000 

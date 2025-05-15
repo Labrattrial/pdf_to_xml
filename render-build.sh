@@ -17,6 +17,9 @@ export PATH=$JAVA_HOME/bin:$PATH
 echo "Using Java version:"
 java -version
 
+# Create necessary directories
+mkdir -p uploads musicxml
+
 # Download Audiveris (latest release)
 AUDIVERIS_VERSION=5.6.0-bis
 AUDIVERIS_URL="https://github.com/Audiveris/audiveris/archive/refs/tags/5.6.0-bis.zip"
@@ -56,7 +59,15 @@ echo "Found jar file: $JAR_FILE"
 cp "$JAR_FILE" ../audiveris.jar
 cd ..
 
+# Set proper permissions
+chmod +x audiveris.jar
+chmod -R 755 uploads musicxml
+
 echo "Cleaning up..."
 rm -rf audiveris.zip audiveris-5.6.0-bis
+
+# Install Python dependencies
+echo "Installing Python dependencies..."
+pip install -r requirements.txt
 
 echo "Build completed successfully!" 
