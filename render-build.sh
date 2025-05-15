@@ -49,16 +49,37 @@ echo "Copying Audiveris jar..."
 echo "Searching for jar files in build directory..."
 find . -name "*.jar" -type f
 
-# Look for the main application jar file
-JAR_FILE=$(find . -path "*/app/build/libs/audiveris-*.jar" -type f | head -n 1)
+# Try multiple possible locations for the jar file
+echo "Looking for jar file in possible locations..."
+POSSIBLE_PATHS=(
+    "*/app/build/libs/audiveris-*.jar"
+    "*/build/libs/audiveris-*.jar"
+    "*/libs/audiveris-*.jar"
+    "*/dist/audiveris-*.jar"
+)
+
+JAR_FILE=""
+for path in "${POSSIBLE_PATHS[@]}"; do
+    echo "Checking path pattern: $path"
+    found_jar=$(find . -path "$path" -type f | head -n 1)
+    if [ ! -z "$found_jar" ]; then
+        JAR_FILE="$found_jar"
+        echo "Found jar file at: $JAR_FILE"
+        break
+    fi
+done
+
 if [ -z "$JAR_FILE" ]; then
-    echo "Error: Could not find main Audiveris jar file"
+    echo "Error: Could not find Audiveris jar file"
     echo "Current directory: $(pwd)"
-    echo "Directory contents:"
+    echo "Directory structure:"
     ls -R
+    echo "Gradle build output:"
+    ./gradlew tasks --all
     exit 1
 fi
-echo "Found jar file: $JAR_FILE"
+
+echo "Copying jar file: $JAR_FILE"
 cp "$JAR_FILE" ../audiveris.jar
 cd ..
 
