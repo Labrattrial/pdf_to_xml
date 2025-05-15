@@ -1,6 +1,6 @@
 # Audiforge Service
 
-This is a Dockerized version of the Audiforge service for converting PDF music scores to MusicXML format.
+This is a Dockerized version of the Audiveris service for converting PDF music scores to MusicXML format.
 
 ## Deployment on Render.com
 
@@ -19,13 +19,13 @@ To run the service locally:
 
 ```bash
 # Pull the image
-docker pull ghcr.io/nirmata-1/audiforge:latest
+docker pull audiveris/audiveris:latest
 
 # Run the container
 docker run -d -p 8080:8080 \
   -v $(pwd)/uploads:/tmp/uploads \
   -v $(pwd)/downloads:/tmp/downloads \
-  ghcr.io/nirmata-1/audiforge:latest
+  audiveris/audiveris:latest
 ```
 
 ## Usage
@@ -46,7 +46,7 @@ The service will be available at:
 import 'package:http/http.dart' as http;
 import 'dart:io';
 
-class AudiforgeService {
+class AudiverisService {
   final String baseUrl = 'https://your-app-name.onrender.com'; // Change to your Render URL
 
   Future<String> convertPdfToMusicXml(File pdfFile) async {
@@ -90,4 +90,4 @@ class AudiforgeService {
 
 ## License
 
-This project uses the Audiforge service from [Nirmata](https://github.com/nirmata-1/audiforge). 
+This project uses the Audiveris service, which is open source and available under the GNU General Public License. 
