@@ -5,13 +5,19 @@ echo "Starting build process..."
 
 # Download Audiveris (latest release)
 AUDIVERIS_VERSION=5.3.3
-AUDIVERIS_URL="https://github.com/Audiveris/audiveris/releases/download/${AUDIVERIS_VERSION}/audiveris-${AUDIVERIS_VERSION}.zip"
+AUDIVERIS_URL="https://github.com/Audiveris/audiveris/releases/download/v${AUDIVERIS_VERSION}/audiveris-${AUDIVERIS_VERSION}.zip"
 
 echo "Downloading Audiveris version ${AUDIVERIS_VERSION}..."
-curl -L -o audiveris.zip "$AUDIVERIS_URL"
+wget -O audiveris.zip "$AUDIVERIS_URL"
+
+# Verify the download
+if [ ! -s audiveris.zip ]; then
+    echo "Error: Download failed or file is empty"
+    exit 1
+fi
 
 echo "Extracting Audiveris..."
-unzip audiveris.zip
+unzip -o audiveris.zip
 
 echo "Copying Audiveris jar..."
 cp audiveris-${AUDIVERIS_VERSION}/bin/audiveris.jar audiveris.jar
