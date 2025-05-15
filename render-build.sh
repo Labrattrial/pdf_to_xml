@@ -3,16 +3,12 @@ set -e
 
 echo "Starting build process..."
 
-# Install Java
-echo "Installing Java..."
-apt-get update
-apt-get install -y default-jdk
-
-# Set JAVA_HOME
-export JAVA_HOME=/usr/lib/jvm/default-java
+# Set JAVA_HOME to use Render's pre-installed Java
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 
 # Verify Java installation
+echo "Using Java version:"
 java -version
 
 # Download Audiveris (latest release)
