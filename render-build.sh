@@ -3,8 +3,14 @@ set -e
 
 echo "Starting build process..."
 
-# Set JAVA_HOME to use Render's pre-installed Java
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+# Install Java using sdkman
+echo "Installing Java using sdkman..."
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 21.0.3-tem
+
+# Set JAVA_HOME
+export JAVA_HOME="$HOME/.sdkman/candidates/java/current"
 export PATH=$JAVA_HOME/bin:$PATH
 
 # Verify Java installation
