@@ -18,6 +18,7 @@ echo "Using Java version:"
 java -version
 
 # Create necessary directories
+echo "Creating directories..."
 mkdir -p uploads musicxml
 
 # Download Audiveris (latest release)
@@ -42,7 +43,7 @@ chmod +x gradlew
 
 # Build the entire project
 echo "Building all modules..."
-./gradlew clean build -x test
+./gradlew clean build -x test --info
 
 echo "Copying Audiveris jar..."
 # List all jar files in the build directory for debugging
@@ -83,7 +84,14 @@ echo "Copying jar file: $JAR_FILE"
 cp "$JAR_FILE" ../audiveris.jar
 cd ..
 
+# Verify the jar file was copied successfully
+if [ ! -f "audiveris.jar" ]; then
+    echo "Error: Failed to copy jar file"
+    exit 1
+fi
+
 # Set proper permissions
+echo "Setting permissions..."
 chmod +x audiveris.jar
 chmod -R 755 uploads musicxml
 
@@ -93,5 +101,14 @@ rm -rf audiveris.zip audiveris-5.6.0-bis
 # Install Python dependencies
 echo "Installing Python dependencies..."
 pip install -r requirements.txt
+
+# Verify Python installation
+echo "Verifying Python installation..."
+python --version
+pip list
+
+# Verify the application can start
+echo "Testing application startup..."
+python pdf_to_musicxml.py --help || true
 
 echo "Build completed successfully!" 
