@@ -39,17 +39,20 @@ unzip -o audiveris.zip
 echo "Building Audiveris..."
 cd audiveris-5.6.0-bis
 chmod +x gradlew
-./gradlew build -x test
+
+# Build the entire project
+echo "Building all modules..."
+./gradlew clean build -x test
 
 echo "Copying Audiveris jar..."
 # List all jar files in the build directory for debugging
 echo "Searching for jar files in build directory..."
 find . -name "*.jar" -type f
 
-# Look for the jar file in the root build directory
-JAR_FILE=$(find . -path "*/build/libs/audiveris-*.jar" -type f | head -n 1)
+# Look for the main application jar file
+JAR_FILE=$(find . -path "*/app/build/libs/audiveris-*.jar" -type f | head -n 1)
 if [ -z "$JAR_FILE" ]; then
-    echo "Error: Could not find Audiveris jar file"
+    echo "Error: Could not find main Audiveris jar file"
     echo "Current directory: $(pwd)"
     echo "Directory contents:"
     ls -R
