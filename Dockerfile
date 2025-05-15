@@ -14,9 +14,10 @@ RUN apt-get update && apt-get install -y \
 RUN git clone https://github.com/Audiveris/audiveris.git \
     && cd audiveris \
     && git checkout 5.6.0-bis \
+    && cd app \
     && mvn clean install -DskipTests \
-    && cp app/target/audiveris-*.jar /usr/local/bin/audiveris.jar \
-    && cd .. \
+    && cp target/audiveris-*.jar /usr/local/bin/audiveris.jar \
+    && cd ../.. \
     && rm -rf audiveris
 
 # Create directories
