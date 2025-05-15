@@ -39,10 +39,17 @@ chmod +x gradlew
 ./gradlew build -x test
 
 echo "Copying Audiveris jar..."
-# Find the jar file in the build directory
-JAR_FILE=$(find . -name "audiveris-*.jar" -type f)
+# List all jar files in the build directory for debugging
+echo "Searching for jar files in build directory..."
+find . -name "*.jar" -type f
+
+# Look for the jar file in the specific build directory
+JAR_FILE=$(find . -path "*/build/libs/audiveris-*.jar" -type f)
 if [ -z "$JAR_FILE" ]; then
     echo "Error: Could not find Audiveris jar file"
+    echo "Current directory: $(pwd)"
+    echo "Directory contents:"
+    ls -R
     exit 1
 fi
 echo "Found jar file: $JAR_FILE"
