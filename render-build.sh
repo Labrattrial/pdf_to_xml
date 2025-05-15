@@ -5,12 +5,15 @@ echo "Starting build process..."
 
 # Install Java
 echo "Installing Java..."
-sudo apt-get update
-sudo apt-get install -y openjdk-21-jdk
+apt-get update
+apt-get install -y default-jdk
 
 # Set JAVA_HOME
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/default-java
 export PATH=$JAVA_HOME/bin:$PATH
+
+# Verify Java installation
+java -version
 
 # Download Audiveris (latest release)
 AUDIVERIS_VERSION=5.6.0-bis
