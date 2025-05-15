@@ -43,8 +43,8 @@ echo "Copying Audiveris jar..."
 echo "Searching for jar files in build directory..."
 find . -name "*.jar" -type f
 
-# Look for the jar file in the specific build directory
-JAR_FILE=$(find . -path "*/build/libs/audiveris-*.jar" -type f)
+# Look for the jar file in the root build directory
+JAR_FILE=$(find . -path "*/build/libs/audiveris-*.jar" -type f | head -n 1)
 if [ -z "$JAR_FILE" ]; then
     echo "Error: Could not find Audiveris jar file"
     echo "Current directory: $(pwd)"
