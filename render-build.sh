@@ -3,6 +3,15 @@ set -e
 
 echo "Starting build process..."
 
+# Install Java
+echo "Installing Java..."
+apt-get update
+apt-get install -y openjdk-21-jdk
+
+# Set JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+
 # Download Audiveris (latest release)
 AUDIVERIS_VERSION=5.6.0-bis
 AUDIVERIS_URL="https://github.com/Audiveris/audiveris/archive/refs/tags/5.6.0-bis.zip"
