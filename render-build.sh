@@ -5,7 +5,7 @@ echo "Starting build process..."
 
 # Download Audiveris (latest release)
 AUDIVERIS_VERSION=5.6.0-bis
-AUDIVERIS_URL="https://github.com/Audiveris/audiveris/releases/download/5.6.0-bis/audiveris-5.6.0-bis.zip"
+AUDIVERIS_URL="https://github.com/Audiveris/audiveris/archive/refs/tags/5.6.0-bis.zip"
 
 echo "Downloading Audiveris version ${AUDIVERIS_VERSION}..."
 wget -O audiveris.zip "$AUDIVERIS_URL"
@@ -20,9 +20,9 @@ echo "Extracting Audiveris..."
 unzip -o audiveris.zip
 
 echo "Copying Audiveris jar..."
-cp audiveris-${AUDIVERIS_VERSION}/bin/audiveris.jar audiveris.jar
+cp audiveris-5.6.0-bis/app/build/libs/audiveris-5.6.0-bis.jar audiveris.jar
 
 echo "Cleaning up..."
-rm -rf audiveris.zip audiveris-${AUDIVERIS_VERSION}
+rm -rf audiveris.zip audiveris-5.6.0-bis
 
 echo "Build completed successfully!" 
