@@ -5,7 +5,7 @@ echo "Starting build process..."
 
 # Download Audiveris (latest release)
 AUDIVERIS_VERSION=5.6.0
-AUDIVERIS_URL="https://github.com/Audiveris/audiveris/releases/download/5.6.0/audiveris-5.6.0.zip"
+AUDIVERIS_URL="https://github.com/Audiveris/audiveris/releases/download/v${AUDIVERIS_VERSION}/audiveris-${AUDIVERIS_VERSION}.zip"
 
 echo "Downloading Audiveris version ${AUDIVERIS_VERSION}..."
 wget -O audiveris.zip "$AUDIVERIS_URL"
