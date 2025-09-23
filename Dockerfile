@@ -38,7 +38,9 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Download and install Audiveris from custom hosted .deb file
 WORKDIR /tmp
-RUN wget -O audiveris.deb "https://drive.google.com/uc?export=download&id=111yDN62pcgvTgcHp8YeuL_w8qlgFROJY" \
+# Use wget with cookies to handle Google Drive's virus scan warning for large files
+RUN wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=111yDN62pcgvTgcHp8YeuL_w8qlgFROJY' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=111yDN62pcgvTgcHp8YeuL_w8qlgFROJY" -O audiveris.deb \
+    && rm -rf /tmp/cookies.txt \
     && dpkg -i audiveris.deb || apt-get install -f -y \
     && rm audiveris.deb
 
