@@ -28,7 +28,7 @@ COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Download and install the latest Audiveris (5.7.1) with proper Linux installer
-RUN wget -O audiveris.deb https://github.com/Audiveris/audiveris/releases/download/5.7.1/Audiveris-5.7.1-linux-x64.deb \
+RUN wget -O audiveris.deb https://github.com/Audiveris/audiveris/releases/download/5.7.1/Audiveris-5.7.1-ubuntu24.04.deb \
     && dpkg -i audiveris.deb || apt-get install -f -y \
     && rm audiveris.deb
 
