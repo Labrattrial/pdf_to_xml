@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: pdf-to-musicxml-converter
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: AUDIVERIS_PATH
+        value: /opt/audiveris/bin/Audiveris
