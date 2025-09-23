@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     wget \
+    curl \
     unzip \
     tesseract-ocr \
     tesseract-ocr-eng \
@@ -17,6 +18,9 @@ RUN apt-get update && apt-get install -y \
     git \
     gradle \
     software-properties-common \
+    libxi6 \
+    libxtst6 \
+    xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Java 24 (required for Audiveris 5.7.1)
