@@ -39,16 +39,23 @@ def convert_pdf():
     output_dir = os.path.abspath(os.path.join("outputs", os.path.splitext(pdf.filename)[0]))
     os.makedirs(output_dir, exist_ok=True)
 
-    # Path to Audiveris - use environment variable or default Linux path
-    audiveris_cmd = os.environ.get('AUDIVERIS_PATH', 'audiveris')
+    # Path to Audiveris - use environment variable or default paths
+    # For Docker/Linux deployment, Audiveris is installed at /usr/bin/audiveris
+    # For Windows development, use the Windows path
+    if os.name == 'nt':  # Windows
+        default_audiveris_path = r"D:\Audiveris\audiveris\app\build\distributions\app-5.6.2\bin\Audiveris.bat"
+    else:  # Linux/Docker
+        default_audiveris_path = "/usr/bin/audiveris"
+    
+    audiveris_path = os.environ.get('AUDIVERIS_PATH', default_audiveris_path)
 
     # Run Audiveris
     try:
-        print(f"Running Audiveris with command: {audiveris_cmd} -batch -export -output {output_dir} {pdf_path}")
+        print(f"Running Audiveris with command: {audiveris_path} -batch -export -output {output_dir} {pdf_path}")
         result = subprocess.run([
-            audiveris_cmd,
+            audiveris_path,
             "-batch",
-            "-export", 
+            "-export",
             "-output", output_dir,
             pdf_path
         ], check=True, capture_output=True, text=True, timeout=300)
@@ -159,5 +166,8 @@ def convert_pdf():
     })
 
 if __name__ == "__main__":
+    # Use environment variable for port, default to 5000
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host="0.0.0.0", port=port)
+    # Check if we're in development mode (local) or production (Render)
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug_mode, host="0.0.0.0", port=port)
