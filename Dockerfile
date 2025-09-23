@@ -36,11 +36,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Download and install Audiveris from custom hosted .deb file
+# Download and install Audiveris from MediaFire
 WORKDIR /tmp
-# Use gdown to download from Google Drive (handles large files automatically)
-RUN pip3 install gdown \
-    && gdown --id 111yDN62pcgvTgcHp8YeuL_w8qlgFROJY -O audiveris.deb \
+RUN wget -O audiveris.deb "https://download2263.mediafire.com/vwgzvsxi0lyqw6i/Audiveris-5.7.1-ubuntu22.04-x86_64.deb" \
     && dpkg -i audiveris.deb || apt-get install -f -y \
     && rm audiveris.deb
 
