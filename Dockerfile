@@ -36,22 +36,16 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Build Audiveris from source (more reliable than downloading .deb files)
+# Download and install pre-built Audiveris binary distribution
 WORKDIR /tmp
-RUN git clone https://github.com/Audiveris/audiveris.git \
-    && cd audiveris \
-    && git checkout 5.7.1 \
-    && gradle wrapper \
-    && ./gradlew clean build \
-    && tar -xf build/distributions/Audiveris-*.tar \
+RUN wget -O audiveris.tar https://github.com/Audiveris/audiveris/releases/download/5.7.1/Audiveris-5.7.1.tar \
+    && tar -xf audiveris.tar \
     && mkdir -p /opt/audiveris \
-    && cp -r Audiveris-*/bin /opt/audiveris/ \
-    && cp -r Audiveris-*/lib /opt/audiveris/ \
+    && cp -r Audiveris-5.7.1/* /opt/audiveris/ \
     && chmod +x /opt/audiveris/bin/Audiveris \
-    && cd / \
-    && rm -rf /tmp/audiveris
+    && rm -rf /tmp/*
 
-# Set Audiveris path - built from source
+# Set Audiveris path - pre-built binary
 ENV AUDIVERIS_PATH=/opt/audiveris/bin/Audiveris
 
 # Go back to app directory
