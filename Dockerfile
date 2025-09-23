@@ -36,17 +36,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Download and install pre-built Audiveris binary distribution
+# Download and install Audiveris from custom hosted .deb file
 WORKDIR /tmp
-RUN wget -O audiveris.tar https://github.com/Audiveris/audiveris/releases/download/5.7.1/Audiveris-5.7.1.tar \
-    && tar -xf audiveris.tar \
-    && mkdir -p /opt/audiveris \
-    && cp -r Audiveris-5.7.1/* /opt/audiveris/ \
-    && chmod +x /opt/audiveris/bin/Audiveris \
-    && rm -rf /tmp/*
+RUN wget -O audiveris.deb "https://drive.google.com/uc?export=download&id=111yDN62pcgvTgcHp8YeuL_w8qlgFROJY" \
+    && dpkg -i audiveris.deb || apt-get install -f -y \
+    && rm audiveris.deb
 
-# Set Audiveris path - pre-built binary
-ENV AUDIVERIS_PATH=/opt/audiveris/bin/Audiveris
+# Set Audiveris path - installed via .deb package
+ENV AUDIVERIS_PATH=/opt/audiveris/bin/audiveris
 
 # Go back to app directory
 WORKDIR /app
