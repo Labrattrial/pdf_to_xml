@@ -5,11 +5,10 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies including Java 21+ for Audiveris 5.7+
+# Install system dependencies including Java 24+ for Audiveris 5.7+
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
-    openjdk-21-jdk \
     wget \
     unzip \
     tesseract-ocr \
@@ -17,10 +16,18 @@ RUN apt-get update && apt-get install -y \
     ghostscript \
     git \
     gradle \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Set JAVA_HOME for Java 21
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+# Install Java 24 (required for Audiveris 5.7.1)
+RUN wget -O- https://apt.corretto.aws/corretto.key | apt-key add - \
+    && add-apt-repository 'deb https://apt.corretto.aws stable main' \
+    && apt-get update \
+    && apt-get install -y java-24-amazon-corretto-jdk \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME for Java 24
+ENV JAVA_HOME=/usr/lib/jvm/java-24-amazon-corretto
 
 # Create app directory
 WORKDIR /app
