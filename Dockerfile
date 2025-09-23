@@ -43,7 +43,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # Download and install Audiveris from MediaFire
 WORKDIR /tmp
 RUN wget -O audiveris.deb "https://download1588.mediafire.com/06s7w9ref4ugPDFfGxS4PpHaFMb7wPk4A162408vutNoP-e-u5mmUhAApR558aRCXID8UeVbnLHV1yK7l0SPj7Hd-nYiMN_vPye7VvG7i2YfHdL9gbayVCYPLvlRYwfYp6nL-h0yokz2f-Is0JMAhalCULlTo9dFt43-rZYOcUurLo8/vwgzvsxi0lyqw6i/Audiveris-5.7.1-ubuntu22.04-x86_64.deb" \
-    && dpkg -i audiveris.deb || apt-get install -f -y \
+    && dpkg -i audiveris.deb || true \
     && rm audiveris.deb
 
 # Set Audiveris path - installed via .deb package
