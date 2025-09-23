@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-eng \
     ghostscript \
+    git \
+    gradle \
     && rm -rf /var/lib/apt/lists/*
 
 # Set JAVA_HOME for Java 21
@@ -27,13 +29,26 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Download and install the latest Audiveris (5.7.1) with proper Linux installer
-RUN wget -O audiveris.deb https://github.com/Audiveris/audiveris/releases/download/5.7.1/Audiveris-5.7.1-ubuntu24.04.deb \
-    && dpkg -i audiveris.deb || apt-get install -f -y \
-    && rm audiveris.deb
+# Build Audiveris from source (more reliable than downloading .deb files)
+WORKDIR /tmp
+RUN git clone https://github.com/Audiveris/audiveris.git \
+    && cd audiveris \
+    && git checkout 5.7.1 \
+    && gradle wrapper \
+    && ./gradlew clean build \
+    && tar -xf build/distributions/Audiveris-*.tar \
+    && mkdir -p /opt/audiveris \
+    && cp -r Audiveris-*/bin /opt/audiveris/ \
+    && cp -r Audiveris-*/lib /opt/audiveris/ \
+    && chmod +x /opt/audiveris/bin/Audiveris \
+    && cd / \
+    && rm -rf /tmp/audiveris
 
-# Set Audiveris path - the .deb installer puts it in /opt/audiveris/bin/
-ENV AUDIVERIS_PATH=/opt/audiveris/bin/audiveris
+# Set Audiveris path - built from source
+ENV AUDIVERIS_PATH=/opt/audiveris/bin/Audiveris
+
+# Go back to app directory
+WORKDIR /app
 
 # Copy application code
 COPY . .
