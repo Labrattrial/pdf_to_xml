@@ -58,6 +58,35 @@ def health():
         except:
             debug_info["opt_audiveris_contents"] = "Permission denied"
     
+    # Test if Audiveris can actually run
+    if audiveris_available:
+        try:
+            result = subprocess.run([audiveris_path, '-help'], 
+                                  capture_output=True, text=True, timeout=10)
+            debug_info["audiveris_test"] = {
+                "can_execute": True,
+                "exit_code": result.returncode,
+                "stdout_preview": result.stdout[:200] if result.stdout else "No output",
+                "stderr_preview": result.stderr[:200] if result.stderr else "No errors"
+            }
+        except subprocess.TimeoutExpired:
+            debug_info["audiveris_test"] = {"can_execute": False, "error": "Timeout after 10 seconds"}
+        except Exception as e:
+            debug_info["audiveris_test"] = {"can_execute": False, "error": str(e)}
+    else:
+        debug_info["audiveris_test"] = {"can_execute": False, "error": "File not found"}
+    
+    # Check Java availability
+    try:
+        java_result = subprocess.run(['java', '-version'], 
+                                   capture_output=True, text=True, timeout=5)
+        debug_info["java_test"] = {
+            "available": True,
+            "version_info": java_result.stderr[:200] if java_result.stderr else java_result.stdout[:200]
+        }
+    except Exception as e:
+        debug_info["java_test"] = {"available": False, "error": str(e)}
+    
     return jsonify({
         "status": "ok",
         "audiveris_available": audiveris_available,
