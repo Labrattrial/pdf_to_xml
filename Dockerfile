@@ -47,8 +47,14 @@ WORKDIR /app
 RUN mkdir -p /opt/audiveris
 
 # Copy the entire Audiveris installation from your local machine
-# You'll need to copy your D:\Audiveris folder to ./audiveris_local/ first
 COPY audiveris_local/ /opt/audiveris/
+
+# Build Audiveris from the copied source code
+WORKDIR /opt/audiveris/audiveris
+RUN echo "Building Audiveris from copied source..." && \
+    chmod +x gradlew && \
+    ./gradlew build -x test && \
+    echo "Build completed successfully"
 
 # Make sure the Audiveris executable is executable
 RUN find /opt/audiveris -name "Audiveris" -type f -exec chmod +x {} \; || \
