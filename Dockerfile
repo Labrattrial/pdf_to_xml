@@ -48,12 +48,17 @@ WORKDIR /app
 # Copy the Audiveris DEB file
 COPY Audiveris-5.7.1.deb /tmp/Audiveris-5.7.1.deb
 
-# Install Audiveris with dependencies fixed
+# Install Audiveris with dependencies fixed and skip desktop menu setup
 RUN apt-get update \
     && apt-get install -y libasound2 \
-    && dpkg -i /tmp/Audiveris-5.7.1.deb || true \
+    && dpkg --unpack /tmp/Audiveris-5.7.1.deb \
+    && rm -f /var/lib/dpkg/info/audiveris.postinst \
     && apt-get install -f -y \
+    && dpkg --configure -a \
     && rm /tmp/Audiveris-5.7.1.deb
+
+# Make Audiveris executable accessible globally
+RUN ln -s /opt/audiveris/bin/Audiveris /usr/local/bin/audiveris
 
 # Set Audiveris path environment variable
 ENV AUDIVERIS_PATH=/opt/audiveris/bin/Audiveris
