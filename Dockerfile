@@ -43,7 +43,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # Download and install Audiveris from official release
 WORKDIR /tmp
 # Download the Windows Console MSI (contains cross-platform Java binaries)
-RUN wget -O audiveris.msi "https://github.com/Audiveris/audiveris/releases/download/5.7.1/Audiveris-5.7.1-windowsConsole-x86_64.msi" \
+RUN wget -O audiveris.msi "https://download1648.mediafire.com/szwayw9o7rgg0WIdqK5ZIwi2sfIMr7Cmk_uU8quf5hdQgBO0Hq2OOp7IhuIVwfVbQVCGgB3p8irKPSw-adl-IbtUTP0h6bIdLom_ZRhp8BCPWinv-5qnqAuymbUvsiK8cnCw3yQuz2Xvz_CCs4Fs1itAo0M9Mosql0zg9y64/5euy8etgfb8a9rq/Audiveris-5.7.1-windowsConsole-x86_64.msi" \
     && echo "=== Installing msitools to extract MSI ===" \
     && apt-get update && apt-get install -y msitools \
     && echo "=== Extracting Audiveris from MSI ===" \
