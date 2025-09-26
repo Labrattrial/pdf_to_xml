@@ -61,32 +61,16 @@ def health():
     # Test if Audiveris can actually run
     if audiveris_available:
         try:
-            # First, let's see what the wrapper script actually contains
-            script_content = "Could not read script"
-            try:
-                with open(audiveris_path, 'r') as f:
-                    script_content = f.read()
-            except Exception as e:
-                script_content = f"Error reading script: {str(e)}"
-            
-            # Run with a simple argument to see debug output
-            result = subprocess.run(
-                [audiveris_path, '-help'], 
-                capture_output=True, 
-                text=True, 
-                timeout=30,
-                cwd='/app'
-            )
-            
+            result = subprocess.run([audiveris_path, '-help'], 
+                                  capture_output=True, text=True, timeout=10)
             debug_info["audiveris_test"] = {
                 "can_execute": True,
                 "exit_code": result.returncode,
-                "stdout_preview": result.stdout[:1000] if result.stdout else "No output",
-                "stderr_preview": result.stderr[:1000] if result.stderr else "No errors",
-                "script_content_preview": script_content[:2000] if script_content else "No script content"
+                "stdout_preview": result.stdout[:200] if result.stdout else "No output",
+                "stderr_preview": result.stderr[:200] if result.stderr else "No errors"
             }
         except subprocess.TimeoutExpired:
-            debug_info["audiveris_test"] = {"can_execute": False, "error": "Timeout after 30 seconds"}
+            debug_info["audiveris_test"] = {"can_execute": False, "error": "Timeout after 10 seconds"}
         except Exception as e:
             debug_info["audiveris_test"] = {"can_execute": False, "error": str(e)}
     else:
@@ -131,7 +115,7 @@ def convert_pdf():
 
     # Path to Audiveris - configurable via environment variable
     # Default to Linux path for cloud deployment, fallback to Windows for local dev
-    audiveris_path = os.environ.get('AUDIVERIS_PATH', '/usr/local/bin/audiveris')
+    audiveris_path = os.environ.get('AUDIVERIS_PATH', '/opt/audiveris/bin/Audiveris')
     
     # Check if we're on Windows (for local development)
     if os.name == 'nt' and not os.environ.get('AUDIVERIS_PATH'):
