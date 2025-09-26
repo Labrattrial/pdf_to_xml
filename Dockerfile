@@ -23,6 +23,13 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     libleptonica-dev \
     libtesseract-dev \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libfreetype6 \
+    fontconfig \
+    fonts-dejavu-core \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Java 21 (compatible with Gradle 8.7 and Audiveris)
@@ -74,7 +81,10 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
     else \
         echo "Creating JAR wrapper for pre-built Audiveris" && \
         echo '#!/bin/bash' > /usr/local/bin/audiveris && \
+        echo 'export DISPLAY=:99' >> /usr/local/bin/audiveris && \
         echo 'export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"' >> /usr/local/bin/audiveris && \
+        echo 'Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &' >> /usr/local/bin/audiveris && \
+        echo 'sleep 2' >> /usr/local/bin/audiveris && \
         echo 'AUDIVERIS_JAR=$(find /opt/audiveris -name "audiveris.jar" -type f | head -1)' >> /usr/local/bin/audiveris && \
         echo 'if [ -z "$AUDIVERIS_JAR" ]; then' >> /usr/local/bin/audiveris && \
         echo '  echo "Error: Could not find audiveris.jar"' >> /usr/local/bin/audiveris && \
@@ -84,7 +94,7 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo 'fi' >> /usr/local/bin/audiveris && \
         echo 'AUDIVERIS_LIB_DIR=$(dirname "$AUDIVERIS_JAR")' >> /usr/local/bin/audiveris && \
         echo 'CLASSPATH="$AUDIVERIS_JAR:$AUDIVERIS_LIB_DIR/*"' >> /usr/local/bin/audiveris && \
-        echo 'java -Djava.library.path="/usr/lib/x86_64-linux-gnu:/usr/lib:/lib" -cp "$CLASSPATH" Audiveris "$@"' >> /usr/local/bin/audiveris && \
+        echo 'java -Djava.awt.headless=false -Djava.library.path="/usr/lib/x86_64-linux-gnu:/usr/lib:/lib" -cp "$CLASSPATH" Audiveris "$@"' >> /usr/local/bin/audiveris && \
         chmod +x /usr/local/bin/audiveris; \
     fi
 
