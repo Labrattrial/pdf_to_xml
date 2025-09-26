@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y \
     fontconfig \
     fonts-dejavu-core \
     xvfb \
+    dbus-x11 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Java 21 (compatible with Audiveris)
@@ -47,8 +48,10 @@ WORKDIR /app
 # Copy the Audiveris DEB file
 COPY Audiveris-5.7.1.deb /tmp/Audiveris-5.7.1.deb
 
-# Install Audiveris from DEB package
-RUN dpkg -i /tmp/Audiveris-5.7.1.deb || true \
+# Install Audiveris from DEB package with force configuration
+RUN dpkg --unpack /tmp/Audiveris-5.7.1.deb \
+    && rm -f /var/lib/dpkg/info/audiveris.postinst \
+    && dpkg --configure audiveris \
     && apt-get update \
     && apt-get install -f -y \
     && rm /tmp/Audiveris-5.7.1.deb
