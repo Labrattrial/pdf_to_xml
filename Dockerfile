@@ -30,6 +30,12 @@ RUN apt-get update && apt-get install -y \
     fontconfig \
     fonts-dejavu-core \
     xvfb \
+    liblcms2-2 \
+    libpng16-16 \
+    libjpeg8 \
+    libtiff5 \
+    libwebp6 \
+    libopenjp2-7 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Java 21 (compatible with Gradle 8.7 and Audiveris)
@@ -97,11 +103,13 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo '# Extract native libraries from JAR files' >> /usr/local/bin/audiveris && \
         echo 'NATIVE_LIB_DIR="/tmp/audiveris-native-$$"' >> /usr/local/bin/audiveris && \
         echo 'mkdir -p "$NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
-        echo 'for jar in "$AUDIVERIS_LIB_DIR"/*leptonica*.jar "$AUDIVERIS_LIB_DIR"/*tesseract*.jar; do' >> /usr/local/bin/audiveris && \
+        echo 'for jar in "$AUDIVERIS_LIB_DIR"/*leptonica*.jar "$AUDIVERIS_LIB_DIR"/*tesseract*.jar "$AUDIVERIS_LIB_DIR"/*javacpp*.jar; do' >> /usr/local/bin/audiveris && \
         echo '  if [ -f "$jar" ]; then' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
+        echo '    unzip -j "$jar" "linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '  fi' >> /usr/local/bin/audiveris && \
         echo 'done' >> /usr/local/bin/audiveris && \
+        echo 'chmod +x "$NATIVE_LIB_DIR"/*.so* 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo 'export LD_LIBRARY_PATH="$NATIVE_LIB_DIR:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"' >> /usr/local/bin/audiveris && \
         echo 'java -Djava.awt.headless=false -Djava.library.path="$NATIVE_LIB_DIR:/usr/lib/x86_64-linux-gnu:/usr/lib:/lib" -cp "$CLASSPATH" Audiveris "$@"' >> /usr/local/bin/audiveris && \
         echo 'rm -rf "$NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
