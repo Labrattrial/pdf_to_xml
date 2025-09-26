@@ -16,6 +16,11 @@ def cleanup_directories():
     except Exception as e:
         print(f"Warning: Could not clean directories: {e}")
 
+# ✅ New landing page
+@app.route("/")
+def home():
+    return "🎵 PDF to MusicXML Converter is running!"
+
 @app.get("/health")
 def health():
     # Check if Audiveris is available
@@ -114,7 +119,6 @@ def convert_pdf():
     os.makedirs(output_dir, exist_ok=True)
 
     # Path to Audiveris - configurable via environment variable
-    # Default to Linux path for cloud deployment, fallback to Windows for local dev
     audiveris_path = os.environ.get('AUDIVERIS_PATH', '/opt/audiveris/bin/Audiveris')
     
     # Check if we're on Windows (for local development)
@@ -141,11 +145,9 @@ def convert_pdf():
         return jsonify({'error': f'Audiveris processing failed: {e.stderr if e.stderr else "Unknown error"}'}), 500
 
     # Search for MXL files in both output directory and uploads directory
-    # Audiveris sometimes creates MXL files in the same directory as the input PDF
     print(f"Searching for MXL files in: {output_dir} and uploads directory")
     mxl_files = []
     
-    # Search in output directory first
     for root, dirs, files in os.walk(output_dir):
         print(f"Checking output directory: {root}")
         print(f"Files found: {files}")
@@ -154,7 +156,6 @@ def convert_pdf():
                 mxl_files.append(os.path.join(root, f))
                 print(f"Found MXL file in output: {os.path.join(root, f)}")
     
-    # If no MXL files in output directory, check uploads directory
     if not mxl_files:
         uploads_dir = os.path.abspath("uploads")
         for root, dirs, files in os.walk(uploads_dir):
@@ -166,7 +167,6 @@ def convert_pdf():
                     print(f"Found MXL file in uploads: {os.path.join(root, f)}")
 
     if not mxl_files:
-        # Also check if Audiveris created any files at all in the output directory
         all_files = []
         for root, dirs, files in os.walk(output_dir):
             all_files.extend(files)
@@ -178,11 +178,9 @@ def convert_pdf():
         else:
             return jsonify({'error': 'PDF was processed but no music notation was found - please ensure the PDF contains clear sheet music'}), 400
 
-    # Move MXL files from uploads to output directory if they were created there
     final_mxl_files = []
     for mxl_file in mxl_files:
         if "uploads" in mxl_file:
-            # Move the file to output directory
             filename = os.path.basename(mxl_file)
             new_path = os.path.join(output_dir, filename)
             shutil.move(mxl_file, new_path)
@@ -191,11 +189,9 @@ def convert_pdf():
         else:
             final_mxl_files.append(mxl_file)
     
-    # Take the first MXL file found (should be from current conversion only)
     mxl_path = final_mxl_files[0]
     musicxml_path = os.path.join(output_dir, "score.musicxml")
 
-    # Extract MusicXML from MXL
     try:
         print(f"Extracting MusicXML from: {mxl_path}")
         with zipfile.ZipFile(mxl_path, 'r') as zip_ref:
@@ -209,7 +205,6 @@ def convert_pdf():
     except zipfile.BadZipFile:
         return jsonify({'error': 'Generated file is corrupted - the PDF may not contain valid sheet music'}), 500
 
-    # Read the MusicXML content and return it
     try:
         with open(musicxml_path, 'r', encoding='utf-8') as f:
             musicxml_content = f.read()
@@ -217,7 +212,6 @@ def convert_pdf():
         print(f"MusicXML content length: {len(musicxml_content)}")
         print(f"MusicXML preview: {musicxml_content[:200]}...")
         
-        # Basic validation - check if the MusicXML contains actual music elements
         if '<score-partwise' not in musicxml_content and '<score-timewise' not in musicxml_content:
             print("ERROR: No score-partwise or score-timewise found in MusicXML")
             return jsonify({'error': 'Generated file does not contain valid music notation'}), 400
@@ -230,7 +224,7 @@ def convert_pdf():
 
     return jsonify({
         'message': 'Conversion done',
-        'musicxml': musicxml_content,  # This is what Flutter expects
+        'musicxml': musicxml_content,
         'musicxml_path': musicxml_path,
         'mxl_source': mxl_path,
         'mxl_files': final_mxl_files
