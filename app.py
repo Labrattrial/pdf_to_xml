@@ -19,7 +19,7 @@ def cleanup_directories():
 @app.get("/health")
 def health():
     # Check if Audiveris is available
-    audiveris_path = os.environ.get('AUDIVERIS_PATH', '/opt/audiveris/bin/Audiveris')
+    audiveris_path = os.environ.get('AUDIVERIS_PATH', '/usr/local/bin/audiveris')
     
     # Check if we're on Windows (for local development)
     if os.name == 'nt' and not os.environ.get('AUDIVERIS_PATH'):
@@ -27,12 +27,42 @@ def health():
     
     audiveris_available = os.path.exists(audiveris_path)
     
+    # Additional debugging info for deployment
+    debug_info = {
+        "audiveris_path": audiveris_path,
+        "path_exists": audiveris_available,
+        "environment_audiveris_path": os.environ.get('AUDIVERIS_PATH', 'Not set'),
+        "platform": os.name,
+        "cwd": os.getcwd(),
+    }
+    
+    # Check common Audiveris locations
+    common_paths = [
+        '/usr/local/bin/audiveris',
+        '/opt/audiveris/bin/Audiveris',
+        '/opt/audiveris/audiveris',
+        '/usr/bin/audiveris'
+    ]
+    
+    found_paths = []
+    for path in common_paths:
+        if os.path.exists(path):
+            found_paths.append(path)
+    
+    debug_info["found_audiveris_paths"] = found_paths
+    
+    # List contents of /opt/audiveris if it exists
+    if os.path.exists('/opt/audiveris'):
+        try:
+            debug_info["opt_audiveris_contents"] = os.listdir('/opt/audiveris')
+        except:
+            debug_info["opt_audiveris_contents"] = "Permission denied"
+    
     return jsonify({
         "status": "ok",
-        "audiveris_path": audiveris_path,
         "audiveris_available": audiveris_available,
-        "platform": os.name,
-        "environment": "production" if not os.environ.get('DEBUG', 'False').lower() == 'true' else "development"
+        "environment": "production" if not os.environ.get('DEBUG', 'False').lower() == 'true' else "development",
+        "debug": debug_info
     }), 200
 
 @app.route('/convert', methods=['POST'])
