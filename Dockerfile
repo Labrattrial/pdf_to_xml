@@ -60,15 +60,18 @@ RUN find /opt/audiveris -name "Audiveris" -type f -exec chmod +x {} \; || \
     find /opt/audiveris -name "*.jar" -type f -exec echo "Found JAR: {}" \;
 
 # Create a proper wrapper script to run Audiveris using the pre-built JAR
-RUN if [ -f /opt/audiveris/audiveris/app/build/distributions/app-*/bin/Audiveris ]; then \
+RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo "Using built Audiveris executable" && \
+        ln -s /opt/audiveris/audiveris/bin/Audiveris /usr/local/bin/audiveris; \
+    elif [ -f /opt/audiveris/audiveris/app/build/distributions/app-*/bin/Audiveris ]; then \
+        echo "Using distribution Audiveris executable" && \
         find /opt/audiveris -name "Audiveris" -path "*/bin/*" -exec ln -s {} /usr/local/bin/audiveris \;; \
     else \
         echo "Creating JAR wrapper for pre-built Audiveris" && \
         echo '#!/bin/bash' > /usr/local/bin/audiveris && \
-        echo 'AUDIVERIS_JAR=$(find /opt/audiveris -path "*/lib/audiveris.jar" | head -1)' >> /usr/local/bin/audiveris && \
+        echo 'AUDIVERIS_JAR=$(find /opt/audiveris -name "audiveris.jar" -type f | head -1)' >> /usr/local/bin/audiveris && \
         echo 'if [ -z "$AUDIVERIS_JAR" ]; then' >> /usr/local/bin/audiveris && \
-        echo '  echo "Error: Could not find audiveris.jar in lib directory"' >> /usr/local/bin/audiveris && \
+        echo '  echo "Error: Could not find audiveris.jar"' >> /usr/local/bin/audiveris && \
         echo '  echo "Available JAR files:"' >> /usr/local/bin/audiveris && \
         echo '  find /opt/audiveris -name "*.jar" | head -10' >> /usr/local/bin/audiveris && \
         echo '  exit 1' >> /usr/local/bin/audiveris && \
