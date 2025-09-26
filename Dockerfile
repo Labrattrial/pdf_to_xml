@@ -80,7 +80,26 @@ RUN find /opt/audiveris -name "Audiveris" -type f -exec chmod +x {} \; || \
 # Create a proper wrapper script to run Audiveris using the pre-built JAR
 RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo "Using built Audiveris executable" && \
-        ln -s /opt/audiveris/audiveris/bin/Audiveris /usr/local/bin/audiveris; \
+        echo '#!/bin/bash' > /usr/local/bin/audiveris && \
+        echo 'export DISPLAY=:99' >> /usr/local/bin/audiveris && \
+        echo 'Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &' >> /usr/local/bin/audiveris && \
+        echo 'sleep 2' >> /usr/local/bin/audiveris && \
+        echo '# Extract native libraries from JAR files' >> /usr/local/bin/audiveris && \
+        echo 'NATIVE_LIB_DIR="/tmp/audiveris-native-$$"' >> /usr/local/bin/audiveris && \
+        echo 'mkdir -p "$NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
+        echo 'LIB_DIR="/opt/audiveris/audiveris/lib"' >> /usr/local/bin/audiveris && \
+        echo 'for jar in "$LIB_DIR"/*.jar; do' >> /usr/local/bin/audiveris && \
+        echo '  if [[ "$jar" == *"leptonica"* || "$jar" == *"tesseract"* || "$jar" == *"javacpp"* ]]; then' >> /usr/local/bin/audiveris && \
+        echo '    unzip -j "$jar" "*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
+        echo '    unzip -j "$jar" "linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
+        echo '    unzip -j "$jar" "org/bytedeco/*/linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
+        echo '  fi' >> /usr/local/bin/audiveris && \
+        echo 'done' >> /usr/local/bin/audiveris && \
+        echo 'chmod +x "$NATIVE_LIB_DIR"/*.so* 2>/dev/null || true' >> /usr/local/bin/audiveris && \
+        echo 'export LD_LIBRARY_PATH="$NATIVE_LIB_DIR:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"' >> /usr/local/bin/audiveris && \
+        echo 'cd /opt/audiveris/audiveris' >> /usr/local/bin/audiveris && \
+        echo 'exec ./bin/Audiveris "$@"' >> /usr/local/bin/audiveris && \
+        chmod +x /usr/local/bin/audiveris; \
     elif [ -f /opt/audiveris/audiveris/app/build/distributions/app-*/bin/Audiveris ]; then \
         echo "Using distribution Audiveris executable" && \
         find /opt/audiveris -name "Audiveris" -path "*/bin/*" -exec ln -s {} /usr/local/bin/audiveris \;; \
@@ -100,27 +119,17 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo 'fi' >> /usr/local/bin/audiveris && \
         echo 'AUDIVERIS_LIB_DIR=$(dirname "$AUDIVERIS_JAR")' >> /usr/local/bin/audiveris && \
         echo 'CLASSPATH="$AUDIVERIS_JAR:$AUDIVERIS_LIB_DIR/*"' >> /usr/local/bin/audiveris && \
-        echo '# Debug: Show what JARs we found' >> /usr/local/bin/audiveris && \
-        echo 'echo "DEBUG: Looking for native libraries in:"' >> /usr/local/bin/audiveris && \
-        echo 'ls -la "$AUDIVERIS_LIB_DIR"/*leptonica*.jar "$AUDIVERIS_LIB_DIR"/*tesseract*.jar "$AUDIVERIS_LIB_DIR"/*javacpp*.jar 2>/dev/null || echo "No matching JARs found"' >> /usr/local/bin/audiveris && \
-        echo '# Extract native libraries from JAR files' >> /usr/local/bin/audiveris && \
         echo 'NATIVE_LIB_DIR="/tmp/audiveris-native-$$"' >> /usr/local/bin/audiveris && \
         echo 'mkdir -p "$NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
-        echo 'echo "DEBUG: Extracting to $NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
         echo 'for jar in "$AUDIVERIS_LIB_DIR"/*.jar; do' >> /usr/local/bin/audiveris && \
-        echo '  if [ -f "$jar" ] && [[ "$jar" == *"leptonica"* || "$jar" == *"tesseract"* || "$jar" == *"javacpp"* ]]; then' >> /usr/local/bin/audiveris && \
-        echo '    echo "DEBUG: Processing $jar"' >> /usr/local/bin/audiveris && \
-        echo '    unzip -l "$jar" | grep -E "\\.so|\\.dll|\\.dylib" || echo "No native libs in $jar"' >> /usr/local/bin/audiveris && \
+        echo '  if [[ "$jar" == *"leptonica"* || "$jar" == *"tesseract"* || "$jar" == *"javacpp"* ]]; then' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "org/bytedeco/*/linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '  fi' >> /usr/local/bin/audiveris && \
         echo 'done' >> /usr/local/bin/audiveris && \
-        echo 'echo "DEBUG: Extracted files:"' >> /usr/local/bin/audiveris && \
-        echo 'ls -la "$NATIVE_LIB_DIR" || echo "No files extracted"' >> /usr/local/bin/audiveris && \
         echo 'chmod +x "$NATIVE_LIB_DIR"/*.so* 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo 'export LD_LIBRARY_PATH="$NATIVE_LIB_DIR:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"' >> /usr/local/bin/audiveris && \
-        echo 'echo "DEBUG: LD_LIBRARY_PATH=$LD_LIBRARY_PATH"' >> /usr/local/bin/audiveris && \
         echo 'java -Djava.awt.headless=false -Djava.library.path="$NATIVE_LIB_DIR:/usr/lib/x86_64-linux-gnu:/usr/lib:/lib" -cp "$CLASSPATH" Audiveris "$@"' >> /usr/local/bin/audiveris && \
         echo 'rm -rf "$NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
         chmod +x /usr/local/bin/audiveris; \
