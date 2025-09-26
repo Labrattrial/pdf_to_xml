@@ -40,22 +40,30 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Download and install Audiveris from MediaFire
+# Download and install Audiveris from official release
 WORKDIR /tmp
-RUN wget -O audiveris.deb "https://download1588.mediafire.com/06s7w9ref4ugPDFfGxS4PpHaFMb7wPk4A162408vutNoP-e-u5mmUhAApR558aRCXID8UeVbnLHV1yK7l0SPj7Hd-nYiMN_vPye7VvG7i2YfHdL9gbayVCYPLvlRYwfYp6nL-h0yokz2f-Is0JMAhalCULlTo9dFt43-rZYOcUurLo8/vwgzvsxi0lyqw6i/Audiveris-5.7.1-ubuntu22.04-x86_64.deb" \
-    && echo "=== Installing Audiveris .deb package ===" \
-    && dpkg -i audiveris.deb || true \
-    && echo "=== Checking what files were installed by the .deb package ===" \
-    && dpkg -L audiveris 2>/dev/null || echo "Package 'audiveris' not found in dpkg database" \
-    && echo "=== Searching for audiveris files system-wide ===" \
-    && find / -name "*audiveris*" -type f 2>/dev/null | head -20 || echo "No audiveris files found" \
-    && echo "=== Checking common executable locations ===" \
-    && ls -la /usr/bin/ | grep -i audiveris || echo "No audiveris in /usr/bin" \
-    && ls -la /usr/local/bin/ | grep -i audiveris || echo "No audiveris in /usr/local/bin" \
-    && ls -la /opt/ 2>/dev/null || echo "No /opt directory" \
-    && echo "=== Checking if audiveris command is available in PATH ===" \
-    && which audiveris || echo "audiveris not in PATH" \
-    && rm audiveris.deb
+# Download the Windows Console MSI (contains cross-platform Java binaries)
+RUN wget -O audiveris.msi "https://github.com/Audiveris/audiveris/releases/download/5.7.1/Audiveris-5.7.1-windowsConsole-x86_64.msi" \
+    && echo "=== Installing msitools to extract MSI ===" \
+    && apt-get update && apt-get install -y msitools \
+    && echo "=== Extracting Audiveris from MSI ===" \
+    && msiextract audiveris.msi \
+    && echo "=== Finding extracted Audiveris files ===" \
+    && find . -name "*audiveris*" -type f 2>/dev/null | head -20 \
+    && echo "=== Looking for executable files ===" \
+    && find . -name "*.jar" -o -name "*.bat" -o -name "audiveris*" 2>/dev/null \
+    && echo "=== Moving Audiveris to /opt/audiveris ===" \
+    && mkdir -p /opt/audiveris \
+    && cp -r . /opt/audiveris/ \
+    && echo "=== Creating audiveris wrapper script ===" \
+    && echo '#!/bin/bash' > /usr/bin/audiveris \
+    && echo 'cd /opt/audiveris' >> /usr/bin/audiveris \
+    && echo 'java -jar $(find /opt/audiveris -name "*.jar" | head -1) "$@"' >> /usr/bin/audiveris \
+    && chmod +x /usr/bin/audiveris \
+    && echo "=== Testing audiveris command ===" \
+    && which audiveris \
+    && ls -la /usr/bin/audiveris \
+    && rm -rf /tmp/*
 
 # Set Audiveris path - check common locations and use the correct one
 ENV AUDIVERIS_PATH=/usr/bin/audiveris
