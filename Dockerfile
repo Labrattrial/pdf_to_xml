@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     libxi6 \
     libxtst6 \
     xdg-utils \
+    libleptonica-dev \
+    libtesseract-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Java 21 (compatible with Gradle 8.7 and Audiveris)
