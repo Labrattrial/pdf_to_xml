@@ -48,11 +48,10 @@ WORKDIR /app
 # Copy the Audiveris DEB file
 COPY Audiveris-5.7.1.deb /tmp/Audiveris-5.7.1.deb
 
-# Install Audiveris from DEB package with force configuration
-RUN dpkg --unpack /tmp/Audiveris-5.7.1.deb \
-    && rm -f /var/lib/dpkg/info/audiveris.postinst \
-    && dpkg --configure audiveris \
-    && apt-get update \
+# Install Audiveris with dependencies fixed
+RUN apt-get update \
+    && apt-get install -y libasound2 \
+    && dpkg -i /tmp/Audiveris-5.7.1.deb || true \
     && apt-get install -f -y \
     && rm /tmp/Audiveris-5.7.1.deb
 
