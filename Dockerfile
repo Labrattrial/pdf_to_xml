@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr-eng \
     ghostscript \
     git \
-    gradle \
     software-properties-common \
     libxi6 \
     libxtst6 \
@@ -30,15 +29,9 @@ RUN apt-get update && apt-get install -y \
     fontconfig \
     fonts-dejavu-core \
     xvfb \
-    liblcms2-2 \
-    libpng16-16 \
-    libjpeg8 \
-    libtiff5 \
-    libwebp7 \
-    libopenjp2-7 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Java 21 (compatible with Gradle 8.7 and Audiveris)
+# Install Java 21 (compatible with Audiveris)
 RUN wget -O- https://apt.corretto.aws/corretto.key | apt-key add - \
     && add-apt-repository 'deb https://apt.corretto.aws stable main' \
     && apt-get update \
@@ -55,7 +48,9 @@ WORKDIR /app
 COPY Audiveris-5.7.1.deb /tmp/Audiveris-5.7.1.deb
 
 # Install Audiveris from DEB package
-RUN dpkg -i /tmp/Audiveris-5.7.1.deb || apt-get install -f -y \
+RUN dpkg -i /tmp/Audiveris-5.7.1.deb || true \
+    && apt-get update \
+    && apt-get install -f -y \
     && rm /tmp/Audiveris-5.7.1.deb
 
 # Set Audiveris path environment variable
