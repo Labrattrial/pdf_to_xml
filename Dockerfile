@@ -89,7 +89,7 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo 'mkdir -p "$NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
         echo 'LIB_DIR="/opt/audiveris/audiveris/lib"' >> /usr/local/bin/audiveris && \
         echo 'for jar in "$LIB_DIR"/*.jar; do' >> /usr/local/bin/audiveris && \
-        echo '  if [[ "$jar" == *"leptonica"* || "$jar" == *"tesseract"* || "$jar" == *"javacpp"* ]]; then' >> /usr/local/bin/audiveris && \
+        echo '  if [[ "$jar" == *"leptonica"* || "$jar" == *"tesseract"* || "$jar" == *"javacpp"* ]] && [[ "$jar" != *"windows"* ]]; then' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "org/bytedeco/*/linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
@@ -122,7 +122,7 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo 'NATIVE_LIB_DIR="/tmp/audiveris-native-$$"' >> /usr/local/bin/audiveris && \
         echo 'mkdir -p "$NATIVE_LIB_DIR"' >> /usr/local/bin/audiveris && \
         echo 'for jar in "$AUDIVERIS_LIB_DIR"/*.jar; do' >> /usr/local/bin/audiveris && \
-        echo '  if [[ "$jar" == *"leptonica"* || "$jar" == *"tesseract"* || "$jar" == *"javacpp"* ]]; then' >> /usr/local/bin/audiveris && \
+        echo '  if [[ "$jar" == *"leptonica"* || "$jar" == *"tesseract"* || "$jar" == *"javacpp"* ]] && [[ "$jar" != *"windows"* ]]; then' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
         echo '    unzip -j "$jar" "org/bytedeco/*/linux-x86_64/*.so*" -d "$NATIVE_LIB_DIR" 2>/dev/null || true' >> /usr/local/bin/audiveris && \
