@@ -61,16 +61,28 @@ def health():
     # Test if Audiveris can actually run
     if audiveris_available:
         try:
-            result = subprocess.run([audiveris_path, '-help'], 
-                                  capture_output=True, text=True, timeout=10)
+            # First, let's see what the wrapper script actually contains
+            with open(audiveris_path, 'r') as f:
+                script_content = f.read()
+            
+            # Run with a simple argument to see debug output
+            result = subprocess.run(
+                [audiveris_path, '-help'], 
+                capture_output=True, 
+                text=True, 
+                timeout=30,
+                cwd='/app'
+            )
+            
             debug_info["audiveris_test"] = {
                 "can_execute": True,
                 "exit_code": result.returncode,
-                "stdout_preview": result.stdout[:200] if result.stdout else "No output",
-                "stderr_preview": result.stderr[:200] if result.stderr else "No errors"
+                "stdout_preview": result.stdout[:500] if result.stdout else "No output",
+                "stderr_preview": result.stderr[:500] if result.stderr else "No errors",
+                "script_content_preview": script_content[:1000] if script_content else "No script content"
             }
         except subprocess.TimeoutExpired:
-            debug_info["audiveris_test"] = {"can_execute": False, "error": "Timeout after 10 seconds"}
+            debug_info["audiveris_test"] = {"can_execute": False, "error": "Timeout after 30 seconds"}
         except Exception as e:
             debug_info["audiveris_test"] = {"can_execute": False, "error": str(e)}
     else:
