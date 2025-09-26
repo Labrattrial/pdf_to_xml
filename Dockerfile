@@ -64,10 +64,13 @@ RUN if [ -f /opt/audiveris/bin/Audiveris ]; then \
         find /opt/audiveris -name "Audiveris" -path "*/bin/*" -exec ln -s {} /usr/local/bin/audiveris \;; \
     else \
         echo "Creating JAR wrapper for Audiveris application" && \
+        echo "Searching for audiveris.jar..." && \
+        find /opt/audiveris -name "audiveris.jar" -type f && \
         echo '#!/bin/bash' > /usr/local/bin/audiveris && \
-        echo 'AUDIVERIS_JAR=$(find /opt/audiveris -path "*/lib/audiveris.jar" | head -1)' >> /usr/local/bin/audiveris && \
+        echo 'AUDIVERIS_JAR=$(find /opt/audiveris -name "audiveris.jar" -type f | head -1)' >> /usr/local/bin/audiveris && \
         echo 'if [ -z "$AUDIVERIS_JAR" ]; then' >> /usr/local/bin/audiveris && \
-        echo '  echo "Error: Could not find audiveris.jar in lib directory"' >> /usr/local/bin/audiveris && \
+        echo '  echo "Error: Could not find audiveris.jar anywhere in /opt/audiveris"' >> /usr/local/bin/audiveris && \
+        echo '  find /opt/audiveris -name "*.jar" | head -10' >> /usr/local/bin/audiveris && \
         echo '  exit 1' >> /usr/local/bin/audiveris && \
         echo 'fi' >> /usr/local/bin/audiveris && \
         echo 'AUDIVERIS_LIB_DIR=$(dirname "$AUDIVERIS_JAR")' >> /usr/local/bin/audiveris && \
