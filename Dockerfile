@@ -54,7 +54,10 @@ COPY audiveris_local/ /opt/audiveris/
 # Use the pre-built JAR files from your local installation
 RUN echo "Using pre-built Audiveris JAR files..." && \
     find /opt/audiveris -name "*.jar" -type f | head -10 && \
-    echo "Setting up Audiveris wrapper..."
+    echo "Setting up Audiveris wrapper..." && \
+    echo "Setting up native library path for Leptonica..." && \
+    find /opt/audiveris -name "*leptonica*" -type f && \
+    find /opt/audiveris -name "*tesseract*" -type f
 
 # Make sure the Audiveris executable is executable
 RUN find /opt/audiveris -name "Audiveris" -type f -exec chmod +x {} \; || \
@@ -71,6 +74,7 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
     else \
         echo "Creating JAR wrapper for pre-built Audiveris" && \
         echo '#!/bin/bash' > /usr/local/bin/audiveris && \
+        echo 'export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"' >> /usr/local/bin/audiveris && \
         echo 'AUDIVERIS_JAR=$(find /opt/audiveris -name "audiveris.jar" -type f | head -1)' >> /usr/local/bin/audiveris && \
         echo 'if [ -z "$AUDIVERIS_JAR" ]; then' >> /usr/local/bin/audiveris && \
         echo '  echo "Error: Could not find audiveris.jar"' >> /usr/local/bin/audiveris && \
@@ -80,7 +84,7 @@ RUN if [ -f /opt/audiveris/audiveris/bin/Audiveris ]; then \
         echo 'fi' >> /usr/local/bin/audiveris && \
         echo 'AUDIVERIS_LIB_DIR=$(dirname "$AUDIVERIS_JAR")' >> /usr/local/bin/audiveris && \
         echo 'CLASSPATH="$AUDIVERIS_JAR:$AUDIVERIS_LIB_DIR/*"' >> /usr/local/bin/audiveris && \
-        echo 'java -cp "$CLASSPATH" Audiveris "$@"' >> /usr/local/bin/audiveris && \
+        echo 'java -Djava.library.path="/usr/lib/x86_64-linux-gnu:/usr/lib:/lib" -cp "$CLASSPATH" Audiveris "$@"' >> /usr/local/bin/audiveris && \
         chmod +x /usr/local/bin/audiveris; \
     fi
 
