@@ -40,33 +40,37 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Download and install Audiveris from official release
-WORKDIR /tmp
-# Download the Windows Console MSI (contains cross-platform Java binaries)
-RUN wget -O audiveris.msi "https://download1648.mediafire.com/szwayw9o7rgg0WIdqK5ZIwi2sfIMr7Cmk_uU8quf5hdQgBO0Hq2OOp7IhuIVwfVbQVCGgB3p8irKPSw-adl-IbtUTP0h6bIdLom_ZRhp8BCPWinv-5qnqAuymbUvsiK8cnCw3yQuz2Xvz_CCs4Fs1itAo0M9Mosql0zg9y64/5euy8etgfb8a9rq/Audiveris-5.7.1-windowsConsole-x86_64.msi" \
-    && echo "=== Installing msitools to extract MSI ===" \
-    && apt-get update && apt-get install -y msitools \
-    && echo "=== Extracting Audiveris from MSI ===" \
-    && msiextract audiveris.msi \
-    && echo "=== Finding extracted Audiveris files ===" \
-    && find . -name "*audiveris*" -type f 2>/dev/null | head -20 \
-    && echo "=== Looking for executable files ===" \
-    && find . -name "*.jar" -o -name "*.bat" -o -name "audiveris*" 2>/dev/null \
-    && echo "=== Moving Audiveris to /opt/audiveris ===" \
-    && mkdir -p /opt/audiveris \
-    && cp -r . /opt/audiveris/ \
-    && echo "=== Creating audiveris wrapper script ===" \
-    && echo '#!/bin/bash' > /usr/bin/audiveris \
-    && echo 'cd /opt/audiveris' >> /usr/bin/audiveris \
-    && echo 'java -jar $(find /opt/audiveris -name "*.jar" | head -1) "$@"' >> /usr/bin/audiveris \
-    && chmod +x /usr/bin/audiveris \
-    && echo "=== Testing audiveris command ===" \
-    && which audiveris \
-    && ls -la /usr/bin/audiveris \
-    && rm -rf /tmp/*
+# Copy local Audiveris installation into container
+WORKDIR /app
 
-# Set Audiveris path - check common locations and use the correct one
-ENV AUDIVERIS_PATH=/usr/bin/audiveris
+# Create audiveris directory in container
+RUN mkdir -p /opt/audiveris
+
+# Copy the entire Audiveris installation from your local machine
+# You'll need to copy your D:\Audiveris folder to ./audiveris_local/ first
+COPY audiveris_local/ /opt/audiveris/
+
+# Make sure the Audiveris executable is executable
+RUN find /opt/audiveris -name "Audiveris" -type f -exec chmod +x {} \; || \
+    find /opt/audiveris -name "audiveris" -type f -exec chmod +x {} \; || \
+    find /opt/audiveris -name "*.jar" -type f -exec echo "Found JAR: {}" \;
+
+# Create a wrapper script to run Audiveris
+RUN if [ -f /opt/audiveris/bin/Audiveris ]; then \
+        echo "Using native Audiveris executable" && \
+        ln -s /opt/audiveris/bin/Audiveris /usr/local/bin/audiveris; \
+    elif [ -f /opt/audiveris/app/build/distributions/app-*/bin/Audiveris ]; then \
+        echo "Using built Audiveris executable" && \
+        find /opt/audiveris -name "Audiveris" -path "*/bin/*" -exec ln -s {} /usr/local/bin/audiveris \;; \
+    else \
+        echo "Creating JAR wrapper" && \
+        echo '#!/bin/bash' > /usr/local/bin/audiveris && \
+        echo 'java -jar $(find /opt/audiveris -name "*.jar" | head -1) "$@"' >> /usr/local/bin/audiveris && \
+        chmod +x /usr/local/bin/audiveris; \
+    fi
+
+# Set Audiveris path environment variable
+ENV AUDIVERIS_PATH=/usr/local/bin/audiveris
 
 # Go back to app directory
 WORKDIR /app
